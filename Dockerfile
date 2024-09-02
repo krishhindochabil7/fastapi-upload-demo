@@ -11,9 +11,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code
 COPY . .
 
-# Set the environment variable for the port
-ENV PORT 8080
-
 # Expose the port FastAPI will run on
 EXPOSE 8080
 
