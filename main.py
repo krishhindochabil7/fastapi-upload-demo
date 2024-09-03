@@ -1,9 +1,14 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import HTMLResponse
 from typing import List
+import os
 from loading import loading_graph
 
 app = FastAPI()
+
+# Create the "Temporary" folder if it doesn't exist
+TEMP_DIR = "Temporary"
+os.makedirs(TEMP_DIR, exist_ok=True)
 
 # Home page
 @app.get("/", response_class=HTMLResponse)
@@ -46,14 +51,17 @@ async def upload_file(files: List[UploadFile] = File(...)):
     results = []
 
     for file in files:
-        # Log file upload attempt
         try:
-            # Process the file content directly
-            answer = loading_graph(file)
+            # Save the uploaded file to the "Temporary" folder
+            file_location = os.path.join(TEMP_DIR, file.filename)
+            with open(file_location, "wb") as f:
+                f.write(await file.read())
+
+            # Pass the file path to the loading_graph function
+            answer = loading_graph(file_location)
             results.append(f"{file.filename}: {answer}")
 
         except Exception as e:
-            # Log any exceptions
             results.append(f"{file.filename}: Error - {e}")
 
     return HTMLResponse(f"""
@@ -70,3 +78,4 @@ async def upload_file(files: List[UploadFile] = File(...)):
         </body>
     </html>
     """)
+
